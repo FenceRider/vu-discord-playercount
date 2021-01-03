@@ -192,16 +192,19 @@ class Bot {
     getServerStats_rcon() {
         return __awaiter(this, void 0, void 0, function* () {
             let serverInfo = yield this.rcon.serverInfo();
-            return serverInfo;
+            let maxPlayers = Number.parseInt(yield this.rcon.get("vars.maxPlayers"));
+            let spectatorCount = Number.parseInt(yield this.rcon.get("vu.SpectatorCount"));
+            return { serverInfo: serverInfo, maxPlayers: maxPlayers, spectatorCount: spectatorCount };
         });
     }
-    setPresence(serverInfo) {
+    setPresence(serverStatus) {
         return __awaiter(this, void 0, void 0, function* () {
+            let serverInfo = serverStatus.serverInfo;
             let map = this.mapmap[serverInfo.map];
             if (!map)
                 map = "";
-            let players = serverInfo.slots;
-            let maxplayers = serverInfo.totalSlots;
+            let players = serverInfo.slots - serverStatus.spectatorCount;
+            let maxplayers = serverStatus.maxPlayers;
             let name = "";
             if (this.config.display.usemapname && map) {
                 name += map;

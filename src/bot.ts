@@ -172,7 +172,7 @@ export class Bot {
     }
 
     public async updatePresence() {
-        let serverInfo;
+        let serverInfo:ServerStatus;
         try {
             serverInfo = await this.getServerStats_rcon();
         } catch (e) {
@@ -180,7 +180,8 @@ export class Bot {
             this.rcon_reconnect();
             return
         }
-
+        
+        
         try {
             await this.setPresence(serverInfo);
         } catch (e) {
@@ -189,18 +190,20 @@ export class Bot {
         }
     }
 
-    public async getServerStats_rcon() {
+    public async getServerStats_rcon():Promise<ServerStatus>{
         let serverInfo = await this.rcon.serverInfo();
-
-        return serverInfo
+        let maxPlayers = Number.parseInt(await this.rcon.get("vars.maxPlayers"));
+        let spectatorCount = Number.parseInt(await this.rcon.get("vu.SpectatorCount"));
+        return {serverInfo:serverInfo, maxPlayers:maxPlayers, spectatorCount:spectatorCount};
     }
 
-    public async setPresence(serverInfo: Battlefield.ServerInfo) {
-
+    public async setPresence(serverStatus: ServerStatus) {
+        let serverInfo = serverStatus.serverInfo;
         let map = this.mapmap[serverInfo.map];
         if (!map) map = ""
-        let players = serverInfo.slots;
-        let maxplayers = serverInfo.totalSlots;
+        
+        let players = serverInfo.slots - serverStatus.spectatorCount;
+        let maxplayers = serverStatus.maxPlayers;
 
         let name = "";
         if (this.config.display.usemapname && map) {
@@ -217,5 +220,10 @@ export class Bot {
         });
     }
 
+}
 
+interface ServerStatus{
+    serverInfo:Battlefield.ServerInfo,
+    maxPlayers:number,
+    spectatorCount:number
 }
