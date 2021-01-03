@@ -13,7 +13,7 @@ Configure it using the config file located at app/config.json
         "port": ,
         "password": "",
         "timeout":10000,
-        "maxattempts": 0, //infinte retry
+        "maxattempts": 0, //infinite retry
         "retryinterval": 1000,
         "retryincrease": 0 //increase interval by this amount every retry
     },
